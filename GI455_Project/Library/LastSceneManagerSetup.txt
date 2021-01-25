@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Searching.unity
+- path: Assets/Scene/Searching.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0
