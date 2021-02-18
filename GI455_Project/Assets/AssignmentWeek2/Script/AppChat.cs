@@ -20,18 +20,18 @@ namespace ProgramChat
         public Text inputfieldChat;
         private WebSocket websocket;
 
-        public List<string> chatList = new List<string>();
-        public int tP1, tP2;    
-        // Start is called before the first frame update
+        //public List<string> chatList = new List<string>();
+        //public int tP1, tP2;
+        //Start is called before the first frame update
         void Start()
         {
-
+            
         }
 
         // Update is called once per frame
         void Update()
         {
-
+            
             if ((inputfieldIP.text == "127.0.0.1") && (inputfieldPort.text == "5500"))
             {
                 inputfieldIP.GetComponent<Text>().color = Color.green;
@@ -45,8 +45,8 @@ namespace ProgramChat
                 inputfieldPort.GetComponent<Text>().color = Color.red;
             }
 
-            ChatText();
-            
+            //ChatText();
+
         }
 
         private void OnDestroy()
@@ -57,23 +57,27 @@ namespace ProgramChat
             }
         }
 
-        public void OnMessage(object sender, MessageEventArgs messageEventArgs)
+        private void OnMessage (object sender, MessageEventArgs messageEventArgs)
         {
             Debug.Log("Receive msg : " + messageEventArgs.Data);
 
-            if(messageEventArgs.Data != textP1.text)
-            {
-                chatList.Add(messageEventArgs.Data);
-                tP1 = tP2;
-                tP2 += 1;
+            //if (messageEventArgs.Data != textP1.text)
+            //{
+            //    chatList.Add(messageEventArgs.Data);
+            //    tP1 = tP2;
+            //    tP2 += 1;
 
-            }
-            else
-            {
-                chatList.Add(messageEventArgs.Data);
-                tP2 = tP1;
-                tP1 += 1;
-            }
+
+            //}
+            //else
+            //{
+            //    chatList.Add(messageEventArgs.Data);
+            //    tP2 = tP1;
+            //    tP1 += 1;
+
+
+            //}
+
         }
 
 
@@ -90,21 +94,20 @@ namespace ProgramChat
 
         }
 
-        
+
 
         public void PlayChat()
         {
 
-            if (websocket.ReadyState == WebSocketState.Open)
-            {
+            if (inputfieldChat.text == "" || websocket.ReadyState == WebSocketState.Open)
+            
                 websocket.OnMessage += OnMessage;
-                textP1.text = inputfieldChat.text;
                 websocket.Send(inputfieldChat.text);
-               
-            }
+            
+            
 
         }
-    
+
         public void LeaveChat()
         {
             
@@ -116,22 +119,22 @@ namespace ProgramChat
             panelConnect.SetActive(true);          
         }
 
-        public void ChatText()
-        {
-            if (tP1 > tP2)
-            {
-                if (chatList.Count > 0)
-                {
-                    textP1.text = chatList[chatList.Count - 1];
-                }
-            }
-            else if (tP1 < tP2)
-            {
-                if (chatList.Count > 0)
-                {
-                    textP2.text = chatList[chatList.Count - 1];
-                }
-            }
-        }
+        //public void ChatText()
+        //{
+        //    if (tP1 > tP2)
+        //    {
+        //        if (chatList.Count > 0)
+        //        {
+        //            textP1.text = chatList[chatList.Count - 1];
+        //        }
+        //    }
+        //    else if (tP1 < tP2)
+        //    {
+        //        if (chatList.Count > 0)
+        //        {
+        //            textP2.text = chatList[chatList.Count - 1];
+        //        }
+        //    }
+        //}
     }
 }

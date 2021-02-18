@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/AssignmentWeek2/Scene/NetworkChat.unity
+- path: Assets/AssignmentWeek4/Scenes/AppChat_Create&Jion.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0
