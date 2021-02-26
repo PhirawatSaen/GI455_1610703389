@@ -1,3 +1,81 @@
+const sqlite3 = require('sqlite3').verbose();
+
+let database = new sqlite3.Database('./database/chatDB.db', sqlite3.OPEN_CREATE | sqlite3.OPEN_READWRITE, (err)=>
+{
+    if(err) throw err;
+
+    console.log("Connected to database")
+  
+
+//Update //////////////////////
+    /*var dataFromClientAdd = {
+        evenName: "AddMoney",
+        data: "test1111#100"
+    }*/
+
+    //var splitStr = dataFromClientAdd.data.split("#")
+    //var userID = splitStr[0];
+    //var AddedMoney = parseInt(splitStr[1]);
+
+    //var sqlUpdate = "UPDATE UserDate SET Money= '200' WHERE UserID='"+userID+"' "
+    
+    /*db.all("SELECT Money FROM UserData WHERE UserID='"+userID+"' ", (err,rows)=>
+    {
+        if(err)
+        {
+            var callbackMsg = {
+                evenName: "AddMoney",
+                data: "Fail"
+            }
+            var toJsonStr = JSON.stringify(callbackMsg);
+            console.log("[6]" +toJsonStr);
+        }
+        else
+        {           
+            console.log(rows);
+            if(rows.length > 0)
+            {
+                var currentMoney = rows[0].Money;
+                currentMoney += AddedMoney;
+
+                db.all("UPDATE UserData SET Money='"+currentMoney+"' WHERE UserID='"+userID+"'", (err,rows)=>
+                {
+                    if(err)
+                    {
+                        var callbackMsg = {
+                            evenName: "AddMoney",
+                            data: "Fail"
+                        }
+                        var toJsonStr = JSON.stringify(callbackMsg);
+                        console.log("[7]" +toJsonStr);
+                    }
+                    else
+                    {
+                        var callbackMsg = {
+                            evenName: "AddMoney",
+                            data:currentMoney.toString()
+                        }
+                        var toJsonStr = JSON.stringify(callbackMsg);
+                        console.log("[8]" +toJsonStr);
+                    }
+                });
+            }
+            else
+            {
+            var callbackMsg = 
+            {
+                evenName: "AddMoney",
+                data: "Fail"
+            }
+            
+            var toJsonStr = JSON.stringify(callbackMsg);
+            console.log("[9]" +toJsonStr);
+            
+            }           
+        }
+        
+    });*/
+
 var websocket = require('ws');
 
 var callbackInitServer = ()=>{
@@ -154,39 +232,134 @@ wss.on("connection", (ws)=>{
                 if(isFound)
                 {
                 
-                   var resultData = {
+                    var resultData = {
                     eventName: toJson.eventName,
-                    data:"success"
+                    data:"LeaveRoomFail"
                    }
                     var toJsonStr = JSON.stringify(resultData);
                     ws.send(toJsonStr);
 
-                     console.log("leave room success");
+                     console.log("leave room fail");
                 }
                 else
                 {
 
                     var resultData = {
                     eventName: toJson.eventName,
-                    data:"fail"
+                    data:"LeaveRoomSuccess"
                     }
                     var toJsonStr = JSON.stringify(resultData);
                     ws.send(toJsonStr);
 
-                    console.log("leave room fail");
+                    console.log("leave room success");
                 }
                  
              }
-         });
+
+             else if(toJson.eventName == "Login")
+             {
+                //Login ///////////////////////
+                var dataFromClientLogin = {
+                evenName: "Login",
+                 data: toJson.data   
+                }
+                var splitStr = dataFromClientLogin.data.split("#")
+                 var userID = splitStr[0];
+                 var password = splitStr[1];
+
+                 var sqlSelect = "SELECT * FROM UserData WHERE UserID= '"+userID+"' AND Password= '"+password+"' ";//Login
+    
+                //Login
+                database.all(sqlSelect, (err, rows)=>
+                {
+                 if(err)
+                     {
+                      console.log("[2]" + err);
+                     }
+                 else
+                     {
+                        if(rows.length > 0)
+                        {
+                            console.log("--------[3]--------")
+                            console.log(rows);
+                            console.log("--------[3]--------")
+                            var callbackMsg = {
+                            evenName: "Login",
+                            data: "LoginSuccess"
+                        }
+
+                             var toJsonStr = JSON.stringify(callbackMsg);
+                             ws.send(toJsonStr);
+                            console.log("[4]" +toJsonStr);
+                        }
+                        else
+                         {
+                            var callbackMsg = {
+                            evenName: "Login",
+                            data: "LoginFail"
+                         }
+                            var toJsonStr = JSON.stringify(callbackMsg);
+                            ws.send(toJsonStr);
+                            console.log("[5]" +toJsonStr);
+                         }
+            
+                    }
+                });
+            }
+            else if(toJson.eventName == "Register")
+            {
+                //Register //////////////////////
+                var dataFromClientRegister = 
+                {
+                 evenName: "Register",
+                 data: toJson.data
+                }
+                var splitStr = dataFromClientRegister.data.split("#")
+                var userID = splitStr[0];
+                var password = splitStr[1];
+                var name = splitStr[2];
+    
+
+                var sqlInsert = "INSERT INTO UserData (UserID, Password, Name, Money) VALUES ('"+userID+"', '"+password+"', '"+name+"', '0')";//Register
+    
+
+                //Register
+                database.all(sqlInsert, (err, rows)=>
+                {
+                     if(err)
+                    {
+                         var callbackMsg = 
+                        {
+                        evenName: "Register",
+                        data: "RegisterFail"
+                        }
+                    var toJsonStr = JSON.stringify(callbackMsg);
+                    ws.send(toJsonStr);
+                    console.log("[0]" +toJsonStr);
+                    }
+                    else
+                    {
+                        var callbackMsg = {
+                        evenName: "Register",
+                        data: "RegisterSuccess"
+                         }   
+                        var toJsonStr = JSON.stringify(callbackMsg);
+                        ws.send(toJsonStr);
+                        console.log("[1]" +toJsonStr);
+            
+                    }
+                })
+            }
+            else if(toJson.eventName == "SendMessage")
+            {
+                Boardcast(ws, toJson.data);
+            }
+             
+        });
      
 
     }
-
-            //console.log("send form client " + data);
-            //Boardcast(data); 
-  
-
-         
+          
     console.log("client connected.");
     wsList.push(ws);
 
@@ -234,11 +407,31 @@ function ArrayRemove(arr, value)
     })
 }
 
-function Boardcast(data) 
+function Boardcast(ws, massage) 
 {
-    for (var i = 0; i < wsList.length; i++) 
+    var selectRoomIndex = -1;
+
+    for (var i = 0; i < roomList.length; i++) 
     {
-        wsList[i].send(data);    
+          for(var j = 0; roomList[i].wsList.length; i++)
+          {
+             if(ws == roomList[i].wsList[j])
+             {
+                selectRoomIndex = i;
+                break;
+             }
+          }
+    }
+
+    for(var i = 0 ; i < roomList[selectRoomIndex].wsList.length; i++)
+    {
+        var resultData = {
+            eventName: "SendMessage",
+            data:massage
+        }
+
+        roomList[selectRoomIndex].wsList[i].send(JSON.stringify(resultData));
     }
 }
 
+});
